@@ -51,7 +51,12 @@ CREATE TABLE `ingresos_vehiculos` (
   `color` varchar(30) DEFAULT NULL,
   `fecha_ingreso` datetime DEFAULT current_timestamp(),
   `estado` enum('En Estacionamiento','Finalizado') DEFAULT 'En Estacionamiento',
-  `usuario_registro` varchar(50) DEFAULT 'Admin'
+  `usuario_registro` varchar(50) DEFAULT 'Admin',
+  `pago_adelantado_monto` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `pago_adelantado_concepto` varchar(60) DEFAULT NULL,
+  `pago_adelantado_nota` varchar(120) DEFAULT NULL,
+  `pago_adelantado_fecha` datetime DEFAULT NULL,
+  `pago_adelantado_usuario` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `pagos_pensiones` (
@@ -96,6 +101,7 @@ CREATE TABLE `salidas_vehiculos` (
   `fecha_salida` datetime NOT NULL DEFAULT current_timestamp(),
   `minutos_totales` int(11) NOT NULL DEFAULT 0,
   `monto_total` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `extra_noche` decimal(10,2) NOT NULL DEFAULT 0.00,
   `monto_recibido` decimal(10,2) NOT NULL DEFAULT 0.00,
   `monto_cambio` decimal(10,2) NOT NULL DEFAULT 0.00,
   `usuario_cobro` varchar(50) DEFAULT NULL
@@ -107,7 +113,21 @@ CREATE TABLE `tarifas_vehiculos` (
   `costo_hora` decimal(10,2) NOT NULL,
   `costo_fraccion_extra` decimal(10,2) NOT NULL,
   `tolerancia_extra_minutos` int(11) DEFAULT 0,
-  `costo_boleto_perdido` decimal(10,2) DEFAULT 0.00
+  `tolerancia_entrada_minutos` int(11) DEFAULT 0,
+  `costo_boleto_perdido` decimal(10,2) DEFAULT 0.00,
+  `extra_noche` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `usuarios` (
+  `id` int(11) NOT NULL,
+  `nombre` varchar(80) NOT NULL,
+  `usuario` varchar(50) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `rol` enum('ADMIN','CAJERO','OPERADOR') NOT NULL DEFAULT 'OPERADOR',
+  `activo` tinyint(1) NOT NULL DEFAULT 1,
+  `ultimo_acceso` datetime DEFAULT NULL,
+  `fecha_creacion` datetime NOT NULL DEFAULT current_timestamp(),
+  `fecha_actualizacion` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
@@ -122,7 +142,8 @@ ALTER TABLE `ingresos_vehiculos`
   ADD KEY `id_tarifa` (`id_tarifa`),
   ADD KEY `idx_ingresos_estado` (`estado`),
   ADD KEY `idx_ingresos_fecha_ingreso` (`fecha_ingreso`),
-  ADD KEY `idx_ingresos_placa` (`placa`);
+  ADD KEY `idx_ingresos_placa` (`placa`),
+  ADD KEY `idx_ingresos_pago_adelantado` (`pago_adelantado_fecha`);
 
 ALTER TABLE `pagos_pensiones`
   ADD PRIMARY KEY (`id`),
@@ -142,6 +163,12 @@ ALTER TABLE `salidas_vehiculos`
 ALTER TABLE `tarifas_vehiculos`
   ADD PRIMARY KEY (`id`);
 
+ALTER TABLE `usuarios`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_usuario` (`usuario`),
+  ADD KEY `idx_rol` (`rol`),
+  ADD KEY `idx_activo` (`activo`);
+
 
 ALTER TABLE `configuracion_sistema`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
@@ -162,6 +189,9 @@ ALTER TABLE `salidas_vehiculos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `tarifas_vehiculos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `usuarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 

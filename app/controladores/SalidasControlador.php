@@ -26,50 +26,51 @@ function obtenerValor($clave, $default = null, $payloadJson = null)
     return $default;
 }
 
-function normalizarTipoDescuento($tipo)
-{
-    $tipo = strtoupper(trim((string)$tipo));
-    $permitidos = ['PORCENTAJE', 'MONTO', 'HORAS'];
-    return in_array($tipo, $permitidos, true) ? $tipo : '';
-}
-
 function round2($n)
 {
     return round((float)$n, 2);
 }
 
-function calcularDescuentoMonto($tipo, $valor, $subtotal, $costo_hora)
+function normalizarTipoDescuento($tipo)
 {
-    $tipo = normalizarTipoDescuento($tipo);
+    $t = strtoupper(trim((string)$tipo));
+    if ($t === 'PORCENTAJE' || $t === 'MONTO' || $t === 'HORAS') return $t;
+    return '';
+}
+
+function calcularDescuentoMonto($tipo, $valor, $subtotal, $costoHora)
+{
+    $tipo = strtoupper(trim((string)$tipo));
     $valor = (float)$valor;
     $subtotal = (float)$subtotal;
-    $costo_hora = (float)$costo_hora;
+    $costoHora = (float)$costoHora;
 
-    if ($tipo === '' || $valor <= 0 || $subtotal <= 0) return 0.00;
+    if ($valor <= 0 || $subtotal <= 0) return 0.00;
 
     $m = 0.00;
 
     if ($tipo === 'PORCENTAJE') {
-        if ($valor > 100) $valor = 100;
-        if ($valor < 0) $valor = 0;
-        $m = $subtotal * ($valor / 100);
+        $pct = min(100, max(0, $valor));
+        $m = $subtotal * ($pct / 100);
     } elseif ($tipo === 'MONTO') {
         $m = $valor;
     } elseif ($tipo === 'HORAS') {
-        $m = $valor * $costo_hora;
+        $m = $valor * $costoHora;
+    } else {
+        $m = 0.00;
     }
 
-    if ($m < 0) $m = 0.00;
-    if ($m > $subtotal) $m = $subtotal;
+    if (!is_finite($m)) $m = 0.00;
+    $m = max(0, $m);
+    $m = min($subtotal, $m);
 
     return round2($m);
 }
 
 /**
- * BUSCAR PLACA/TICKET
- * Regla:
- * - Si es PLACA: 1) pensión vigente 2) si no, ingreso activo
- * - Si es NUMÉRICO: ticket => ingreso activo por id
+ * buscar_placa:
+ * - Si es numérico => ticket ingreso
+ * - Si no => placa (primero pension, si no ingreso)
  */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
     try {
@@ -94,7 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
                 $ingreso['costo_hora'],
                 $ingreso['costo_fraccion_extra'],
                 $ingreso['tolerancia_extra_minutos'],
-                (float)($ingreso['extra_noche'] ?? 0)
+                (float)($ingreso['extra_noche'] ?? 0),
+                (int)($ingreso['tolerancia_entrada_minutos'] ?? 0)
             );
 
             echo json_encode([
@@ -105,7 +107,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
                     'ingreso' => $ingreso,
                     'calculo' => [
                         'fecha_salida' => $fecha_salida,
-                        // para UI actual: minutos_totales = minutos cobrables (operativos)
                         'minutos_totales' => (int)$calc['minutos_totales'],
                         'minutos_estancia' => (int)($calc['minutos_estancia'] ?? $calc['minutos_totales']),
                         'minutos_cobrables' => (int)($calc['minutos_cobrables'] ?? $calc['minutos_totales']),
@@ -116,7 +117,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
                         'hora_apertura' => $calc['hora_apertura'] ?? null,
                         'hora_cierre' => $calc['hora_cierre'] ?? null,
                         'sale_despues_cierre' => (int)($calc['sale_despues_cierre'] ?? 0),
-                        'cobro_hasta' => $calc['cobro_hasta'] ?? null
+                        'cobro_hasta' => $calc['cobro_hasta'] ?? null,
+                        'gracia_aplicada_minutos' => (int)($calc['gracia_aplicada_minutos'] ?? 0),
+                        'monto_pagado_adelantado' => (float)min((float)($ingreso['pago_adelantado_monto'] ?? 0), (float)$calc['monto_total']),
+                        'monto_pendiente' => (float)max(0, round2((float)$calc['monto_total'] - (float)($ingreso['pago_adelantado_monto'] ?? 0)))
                     ]
                 ]
             ]);
@@ -128,14 +132,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
         if ($pension) {
             echo json_encode([
                 'exito' => true,
-                'mensaje' => 'Vehículo encontrado en PENSIÓN',
+                'mensaje' => 'Vehículo en pensión',
                 'datos' => [
                     'tipo_resultado' => 'PENSION',
                     'pension' => $pension,
                     'calculo' => [
                         'fecha_salida' => $fecha_salida,
                         'minutos_totales' => 0,
-                        'monto_total' => 0.00
+                        'monto_total' => 0
                     ]
                 ]
             ]);
@@ -143,9 +147,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
         }
 
         $ingreso = $modelo->obtenerIngresoActivoPorPlaca($termino);
-
         if (!$ingreso) {
-            echo json_encode(['exito' => false, 'mensaje' => "No se encontró pensión vigente ni ingreso activo para $termino."]);
+            echo json_encode(['exito' => false, 'mensaje' => "No se encontró un vehículo activo con ese dato."]);
             exit;
         }
 
@@ -155,7 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
             $ingreso['costo_hora'],
             $ingreso['costo_fraccion_extra'],
             $ingreso['tolerancia_extra_minutos'],
-            (float)($ingreso['extra_noche'] ?? 0)
+            (float)($ingreso['extra_noche'] ?? 0),
+            (int)($ingreso['tolerancia_entrada_minutos'] ?? 0)
         );
 
         echo json_encode([
@@ -171,16 +175,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
                     'minutos_cobrables' => (int)($calc['minutos_cobrables'] ?? $calc['minutos_totales']),
                     'monto_tiempo' => (float)($calc['monto_tiempo'] ?? $calc['monto_total']),
                     'extra_noche' => (float)($calc['extra_noche'] ?? 0),
-                        'extra_noche_veces' => (int)($calc['extra_noche_veces'] ?? 0),
+                    'extra_noche_veces' => (int)($calc['extra_noche_veces'] ?? 0),
                     'monto_total' => (float)$calc['monto_total'],
                     'hora_apertura' => $calc['hora_apertura'] ?? null,
                     'hora_cierre' => $calc['hora_cierre'] ?? null,
                     'sale_despues_cierre' => (int)($calc['sale_despues_cierre'] ?? 0),
-                    'cobro_hasta' => $calc['cobro_hasta'] ?? null
+                    'cobro_hasta' => $calc['cobro_hasta'] ?? null,
+                    'gracia_aplicada_minutos' => (int)($calc['gracia_aplicada_minutos'] ?? 0),
+                    'monto_pagado_adelantado' => (float)min((float)($ingreso['pago_adelantado_monto'] ?? 0), (float)$calc['monto_total']),
+                    'monto_pendiente' => (float)max(0, round2((float)$calc['monto_total'] - (float)($ingreso['pago_adelantado_monto'] ?? 0)))
                 ]
             ]
         ]);
         exit;
+
     } catch (Exception $e) {
         echo json_encode(['exito' => false, 'mensaje' => $e->getMessage()]);
         exit;
@@ -188,12 +196,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
 }
 
 /**
- * REGISTRAR SALIDA (SOLO INGRESO)
- * + Soporta boleto_perdido: suma el extra de tarifas_vehiculos.costo_boleto_perdido al subtotal
- * + Soporta descuentos:
- *   - PORCENTAJE: subtotal * (valor/100)
- *   - MONTO: valor (cap al subtotal)
- *   - HORAS: valor * costo_hora (cap al subtotal)
+ * registrar_salida:
+ * - Recalcula monto con base a tiempo + extra_noche (+ boleto perdido si aplica)
+ * - Aplica descuento si viene
+ * - Descuenta pago_adelantado (entrada) del PENDIENTE
+ * - Guarda salida (monto_total = costo real) y monto_recibido = cobrado en salida
  */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'registrar_salida') {
     try {
@@ -204,7 +211,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'registrar_salida') {
         $boleto_perdido = obtenerValor('boleto_perdido', false, $payloadJson);
         $boleto_perdido = filter_var($boleto_perdido, FILTER_VALIDATE_BOOLEAN);
 
-        // descuento (opcional)
         $descuento_tipo = normalizarTipoDescuento(obtenerValor('descuento_tipo', '', $payloadJson));
         $descuento_valor = (float)obtenerValor('descuento_valor', 0, $payloadJson);
         $descuento_motivo = trim((string)obtenerValor('descuento_motivo', '', $payloadJson));
@@ -233,7 +239,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'registrar_salida') {
             $ingreso['costo_hora'],
             $ingreso['costo_fraccion_extra'],
             $ingreso['tolerancia_extra_minutos'],
-            (float)($ingreso['extra_noche'] ?? 0)
+            (float)($ingreso['extra_noche'] ?? 0),
+            (int)($ingreso['tolerancia_entrada_minutos'] ?? 0)
         );
 
         $minutos_totales = (int)$calc['minutos_totales'];
@@ -247,7 +254,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'registrar_salida') {
 
         $subtotal = round2($monto_total_base + $extra_boleto_perdido);
 
-        // si el tipo viene vacío o valor <=0 => no descuento
         if ($descuento_tipo === '' || $descuento_valor <= 0) {
             $descuento_tipo = null;
             $descuento_valor = null;
@@ -264,13 +270,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'registrar_salida') {
 
         $monto_total = round2(max(0, $subtotal - $descuento_monto));
 
-        if ($monto_total > 0 && $monto_recibido < $monto_total) {
+        // Pago adelantado registrado en la entrada (se descuenta del pendiente, no del costo real)
+        $monto_pagado_adelantado = (float)($ingreso['pago_adelantado_monto'] ?? 0);
+        if ($monto_pagado_adelantado < 0) $monto_pagado_adelantado = 0.00;
+        $monto_pagado_adelantado = min($monto_total, $monto_pagado_adelantado);
+
+        $monto_pendiente = round2(max(0, $monto_total - $monto_pagado_adelantado));
+
+        if ($monto_pendiente > 0 && $monto_recibido < $monto_pendiente) {
             echo json_encode(['exito' => false, 'mensaje' => "Monto recibido insuficiente."]);
             exit;
         }
 
-        $monto_cambio = ($monto_total > 0) ? round2($monto_recibido - $monto_total) : 0.00;
-        if ($monto_total == 0) {
+        $monto_cambio = ($monto_pendiente > 0) ? round2($monto_recibido - $monto_pendiente) : 0.00;
+        if ($monto_pendiente == 0) {
             $monto_recibido = 0.00;
             $monto_cambio = 0.00;
         }
@@ -305,28 +318,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'registrar_salida') {
                     'minutos_estancia' => (int)($calc['minutos_estancia'] ?? $minutos_totales),
                     'minutos_cobrables' => (int)($calc['minutos_cobrables'] ?? $minutos_totales),
                     'monto_total_base' => round2($monto_total_base),
+                    'monto_total' => round2($monto_total),
+                    'monto_pagado_adelantado' => round2($monto_pagado_adelantado),
+                    'monto_pendiente' => round2($monto_pendiente),
                     'extra_noche' => round2($extra_noche),
                     'extra_boleto_perdido' => round2($extra_boleto_perdido),
                     'subtotal' => round2($subtotal),
-                    'descuento_tipo' => $descuento_tipo,
-                    'descuento_valor' => $descuento_valor,
                     'descuento_monto' => round2($descuento_monto),
-                    'descuento_motivo' => $descuento_motivo,
-                    'boleto_perdido' => $boleto_perdido ? 1 : 0,
-                    'monto_total' => round2($monto_total),
                     'monto_recibido' => round2($monto_recibido),
-                    'monto_cambio' => round2($monto_cambio),
-                    'fecha_impresion' => date("d/m/Y H:i:s")
+                    'monto_cambio' => round2($monto_cambio)
                 ]
             ]);
             exit;
         }
 
-        throw new Exception("Error al guardar la salida.");
+        echo json_encode(['exito' => false, 'mensaje' => 'No fue posible registrar la salida.']);
+        exit;
+
     } catch (Exception $e) {
         echo json_encode(['exito' => false, 'mensaje' => $e->getMessage()]);
         exit;
     }
 }
 
-echo json_encode(['exito' => false, 'mensaje' => 'Acción no válida o método no permitido.']);
+echo json_encode(['exito' => false, 'mensaje' => 'Acción no válida.']);

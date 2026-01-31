@@ -52,8 +52,10 @@ let pensionActual = null;
 
 let totalBase = 0;             // total por tiempo (sin extras)
 let extraBoletoPerdido = 0;    // recargo configurado por tarifa
-let totalPagar = 0;            // total final (subtotal - descuento)
+let totalPagar = 0;            // pendiente final
 let subtotalActual = 0;        // subtotal = totalBase + recargo (si aplica)
+
+let montoPagadoAdelantado = 0; // pago registrado en entrada (se descuenta del pendiente)
 
 let descuentoTipo = '';
 let descuentoValor = 0;
@@ -171,6 +173,7 @@ function cargarPantallaPension(pension) {
     extraBoletoPerdido = 0;
     subtotalActual = 0;
     totalPagar = 0;
+    montoPagadoAdelantado = 0;
 
     resetDescuento();
 
@@ -217,6 +220,8 @@ function cargarPantallaIngreso(ingreso, calculo) {
     pensionActual = null;
     calculoActual = calculo || null;
 
+    montoPagadoAdelantado = parseFloat(calculo?.monto_pagado_adelantado) || 0;
+
     totalBase = parseFloat(calculo?.monto_total) || 0;
     extraBoletoPerdido = parseFloat(ingreso?.costo_boleto_perdido) || 0;
 
@@ -245,7 +250,6 @@ function cargarPantallaIngreso(ingreso, calculo) {
     ui.txtFechaEntrada.textContent = formatearFechaCortaDesdeMySQL(fechaIngreso);
     ui.txtSalida.textContent = formatearHoraDesdeMySQL(fechaSalida);
 
-    // minutos_totales ahora representan MINUTOS COBRABLES (dentro de horario operativo)
     const minutosCobrables = parseInt(calculo?.minutos_totales, 10) || 0;
     const minutosEstancia = parseInt(calculo?.minutos_estancia, 10) || 0;
 
@@ -260,12 +264,10 @@ function cargarPantallaIngreso(ingreso, calculo) {
         ui.txtTiempo.textContent = `${hCob} h ${mCob} min cobrables`;
     }
 
-    // Mostrar detalles (compacto) pero colapsado por default
     mostrarDetallesCobro();
     renderizarDetallesCobroIngreso(ingreso, calculo);
     colapsarDetalles(true);
 
-    // Mostrar/ocultar boleto perdido
     mostrarBoletoPerdidoSiAplica();
 
     ui.inputRecibido.disabled = false;
@@ -407,7 +409,11 @@ function recalcularTotalesYUI() {
 
     descuentoMonto = calcularDescuentoMonto(descuentoTipo, descuentoValor, subtotalActual, ingresoActual);
 
-    totalPagar = round2(Math.max(0, subtotalActual - descuentoMonto));
+    const totalConDescuento = round2(Math.max(0, subtotalActual - descuentoMonto));
+
+    // Descontar pago adelantado (sin bajar de 0)
+    const pagado = round2(Math.max(0, montoPagadoAdelantado));
+    totalPagar = round2(Math.max(0, totalConDescuento - pagado));
 
     ui.txtTotal.textContent = `$${totalPagar.toFixed(2)}`;
     pintarResumenDescuento();
@@ -504,6 +510,16 @@ function renderizarDetallesCobroIngreso(ingreso, calculo) {
         ? `<div class="d-flex justify-content-between mt-2"><span class="text-muted"><i class="bi bi-tag me-1 text-primary"></i>Descuento</span><span class="fw-semibold text-danger">- $${descuentoMonto.toFixed(2)}</span></div>`
         : '';
 
+    const pagado = round2(Math.max(0, montoPagadoAdelantado));
+    const lineaPagado = (pagado > 0)
+        ? `<div class="d-flex justify-content-between mt-2"><span class="text-muted"><i class="bi bi-wallet2 me-1"></i>Pagado (entrada)</span><span class="fw-semibold text-success">- $${pagado.toFixed(2)}</span></div>`
+        : '';
+
+    const graciaMin = parseInt(calculo?.gracia_aplicada_minutos, 10) || 0;
+    const lineaGracia = (graciaMin > 0)
+        ? `<div class="d-flex justify-content-between"><span class="text-muted">Gracia post-apertura</span><span class="fw-semibold">${graciaMin} min</span></div>`
+        : '';
+
     const lineaHorario = (horaApertura && horaCierre)
         ? `<div class="d-flex justify-content-between"><span class="text-muted">Horario operativo</span><span class="fw-semibold">${horaApertura} - ${horaCierre}</span></div>`
         : `<div class="d-flex justify-content-between"><span class="text-muted">Horario operativo</span><span class="fw-semibold">No configurado</span></div>`;
@@ -534,6 +550,7 @@ function renderizarDetallesCobroIngreso(ingreso, calculo) {
             <div class="mt-2 small">
                 ${lineaHorario}
                 ${lineaCobroHasta}
+                ${lineaGracia}
                 ${lineaEstancia}
                 <div class="d-flex justify-content-between">
                     <span class="text-muted">Minutos cobrables</span>
@@ -554,8 +571,9 @@ function renderizarDetallesCobroIngreso(ingreso, calculo) {
                 ${lineaExtraBoleto}
                 ${lineaSubtotal}
                 ${lineaDescuento}
+                ${lineaPagado}
                 <div class="d-flex justify-content-between mt-2">
-                    <span class="text-muted fw-bold">Total</span>
+                    <span class="text-muted fw-bold">Pendiente</span>
                     <span class="fw-bold">$${totalPagar.toFixed(2)}</span>
                 </div>
             </div>
@@ -641,7 +659,7 @@ async function registrarSalidaIngreso() {
 
     const confirmacion = await Swal.fire({
         title: '¿Confirmar Salida?',
-        text: `Vehículo: ${ingresoActual.placa} - Total: $${totalPagar.toFixed(2)}`,
+        text: `Vehículo: ${ingresoActual.placa} - Pendiente: $${totalPagar.toFixed(2)}`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#4f46e5',
@@ -707,6 +725,7 @@ function reiniciarInterfaz(limpiarBusqueda = true) {
     extraBoletoPerdido = 0;
     subtotalActual = 0;
     totalPagar = 0;
+    montoPagadoAdelantado = 0;
 
     ocultarBoletoPerdido();
     ocultarDescuento();
