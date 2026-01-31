@@ -1,3 +1,4 @@
 1. Agregar dictado de voz
 2. Ver como el sistema puede guardar marcas de vehiculos
 3. Desplegar las impresoras termicas automaticamente
+4. Cuando se registre entrada verificar si el vehiculo cuenta con pension

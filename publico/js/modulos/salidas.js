@@ -245,10 +245,20 @@ function cargarPantallaIngreso(ingreso, calculo) {
     ui.txtFechaEntrada.textContent = formatearFechaCortaDesdeMySQL(fechaIngreso);
     ui.txtSalida.textContent = formatearHoraDesdeMySQL(fechaSalida);
 
-    const minutosTotales = parseInt(calculo?.minutos_totales, 10) || 0;
-    const horas = Math.floor(minutosTotales / 60);
-    const minutosRestantes = minutosTotales % 60;
-    ui.txtTiempo.textContent = `${horas} h ${minutosRestantes} min`;
+    // minutos_totales ahora representan MINUTOS COBRABLES (dentro de horario operativo)
+    const minutosCobrables = parseInt(calculo?.minutos_totales, 10) || 0;
+    const minutosEstancia = parseInt(calculo?.minutos_estancia, 10) || 0;
+
+    const hCob = Math.floor(minutosCobrables / 60);
+    const mCob = minutosCobrables % 60;
+
+    if (minutosEstancia > 0) {
+        const hEst = Math.floor(minutosEstancia / 60);
+        const mEst = minutosEstancia % 60;
+        ui.txtTiempo.textContent = `${hCob} h ${mCob} min cobrables (estancia ${hEst} h ${mEst} min)`;
+    } else {
+        ui.txtTiempo.textContent = `${hCob} h ${mCob} min cobrables`;
+    }
 
     // Mostrar detalles (compacto) pero colapsado por default
     mostrarDetallesCobro();
@@ -437,19 +447,30 @@ function renderizarDetallesCobroIngreso(ingreso, calculo) {
     const costoHora = parseFloat(ingreso?.costo_hora) || 0;
     const costoFraccion = parseFloat(ingreso?.costo_fraccion_extra) || 0;
 
-    const minutosTotales = parseInt(calculo?.minutos_totales, 10) || 0;
-    const horasCompletas = Math.floor(minutosTotales / 60);
-    const minutosRestantes = minutosTotales % 60;
+    const minutosCobrables = parseInt((calculo?.minutos_cobrables ?? calculo?.minutos_totales), 10) || 0;
+    const minutosEstancia = parseInt(calculo?.minutos_estancia, 10) || 0;
 
-    const regla = obtenerReglaAplicada(minutosTotales, tolerancia);
+    const horasCompletas = Math.floor(minutosCobrables / 60);
+    const minutosRestantes = minutosCobrables % 60;
+
+    const regla = obtenerReglaAplicada(minutosCobrables, tolerancia);
+
+    const horaApertura = calculo?.hora_apertura || null;
+    const horaCierre = calculo?.hora_cierre || null;
+    const cobroHastaRaw = calculo?.cobro_hasta || null;
+    const cobroHasta = cobroHastaRaw;
+
+    const saleDespuesCierre = parseInt(calculo?.sale_despues_cierre, 10) === 1;
+    const extraNoche = parseFloat(calculo?.extra_noche) || 0;
+    const extraNocheVeces = parseInt(calculo?.extra_noche_veces, 10) || 0;
 
     let linea1 = '';
     let linea2 = '';
     let linea3 = '';
 
-    if (minutosTotales <= tolerancia) {
+    if (minutosCobrables <= tolerancia) {
         linea1 = `<div class="d-flex justify-content-between"><span class="text-muted">Dentro de tolerancia</span><span class="fw-semibold">$0.00</span></div>`;
-    } else if (minutosTotales < 60) {
+    } else if (minutosCobrables < 60) {
         linea1 = `<div class="d-flex justify-content-between"><span class="text-muted">1 hora mínima</span><span class="fw-semibold">$${costoHora.toFixed(2)}</span></div>`;
     } else {
         const montoHoras = horasCompletas * costoHora;
@@ -483,6 +504,24 @@ function renderizarDetallesCobroIngreso(ingreso, calculo) {
         ? `<div class="d-flex justify-content-between mt-2"><span class="text-muted"><i class="bi bi-tag me-1 text-primary"></i>Descuento</span><span class="fw-semibold text-danger">- $${descuentoMonto.toFixed(2)}</span></div>`
         : '';
 
+    const lineaHorario = (horaApertura && horaCierre)
+        ? `<div class="d-flex justify-content-between"><span class="text-muted">Horario operativo</span><span class="fw-semibold">${horaApertura} - ${horaCierre}</span></div>`
+        : `<div class="d-flex justify-content-between"><span class="text-muted">Horario operativo</span><span class="fw-semibold">No configurado</span></div>`;
+
+    const lineaCobroHasta = (cobroHasta)
+        ? `<div class="d-flex justify-content-between"><span class="text-muted">Se cobra hasta</span><span class="fw-semibold">${formatearHoraDesdeMySQL(cobroHastaRaw)} (${formatearFechaCortaDesdeMySQL(cobroHastaRaw)})</span></div>`
+        : '';
+
+    const extraNocheLabel = `Extra noche${extraNocheVeces > 1 ? ' x' + extraNocheVeces : ''}${(saleDespuesCierre && cobroHastaRaw) ? ' (después de ' + formatearHoraDesdeMySQL(cobroHastaRaw) + ')' : ''}`;
+
+    const lineaExtraNoche = (extraNoche > 0)
+        ? `<div class="d-flex justify-content-between mt-2"><span class="text-muted"><i class="bi bi-moon-stars me-1"></i>${extraNocheLabel}</span><span class="fw-semibold">$${extraNoche.toFixed(2)}</span></div>`
+        : '';
+
+    const lineaEstancia = (minutosEstancia > 0)
+        ? `<div class="d-flex justify-content-between"><span class="text-muted">Minutos estancia</span><span class="fw-semibold">${minutosEstancia} min</span></div>`
+        : '';
+
     const html = `
         <div class="p-3 bg-light rounded-4 border">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -493,9 +532,12 @@ function renderizarDetallesCobroIngreso(ingreso, calculo) {
             </div>
 
             <div class="mt-2 small">
+                ${lineaHorario}
+                ${lineaCobroHasta}
+                ${lineaEstancia}
                 <div class="d-flex justify-content-between">
-                    <span class="text-muted">Minutos totales</span>
-                    <span class="fw-semibold">${minutosTotales} min</span>
+                    <span class="text-muted">Minutos cobrables</span>
+                    <span class="fw-semibold">${minutosCobrables} min</span>
                 </div>
                 <div class="d-flex justify-content-between">
                     <span class="text-muted">Minutos restantes</span>
@@ -508,6 +550,7 @@ function renderizarDetallesCobroIngreso(ingreso, calculo) {
             <div class="small">
                 ${linea1 || ''}
                 ${linea2 || ''}
+                ${lineaExtraNoche}
                 ${lineaExtraBoleto}
                 ${lineaSubtotal}
                 ${lineaDescuento}

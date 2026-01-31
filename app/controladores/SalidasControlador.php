@@ -93,7 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
                 $fecha_salida,
                 $ingreso['costo_hora'],
                 $ingreso['costo_fraccion_extra'],
-                $ingreso['tolerancia_extra_minutos']
+                $ingreso['tolerancia_extra_minutos'],
+                (float)($ingreso['extra_noche'] ?? 0)
             );
 
             echo json_encode([
@@ -104,8 +105,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
                     'ingreso' => $ingreso,
                     'calculo' => [
                         'fecha_salida' => $fecha_salida,
+                        // para UI actual: minutos_totales = minutos cobrables (operativos)
                         'minutos_totales' => (int)$calc['minutos_totales'],
-                        'monto_total' => (float)$calc['monto_total']
+                        'minutos_estancia' => (int)($calc['minutos_estancia'] ?? $calc['minutos_totales']),
+                        'minutos_cobrables' => (int)($calc['minutos_cobrables'] ?? $calc['minutos_totales']),
+                        'monto_tiempo' => (float)($calc['monto_tiempo'] ?? $calc['monto_total']),
+                        'extra_noche' => (float)($calc['extra_noche'] ?? 0),
+                        'extra_noche_veces' => (int)($calc['extra_noche_veces'] ?? 0),
+                        'monto_total' => (float)$calc['monto_total'],
+                        'hora_apertura' => $calc['hora_apertura'] ?? null,
+                        'hora_cierre' => $calc['hora_cierre'] ?? null,
+                        'sale_despues_cierre' => (int)($calc['sale_despues_cierre'] ?? 0),
+                        'cobro_hasta' => $calc['cobro_hasta'] ?? null
                     ]
                 ]
             ]);
@@ -143,7 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
             $fecha_salida,
             $ingreso['costo_hora'],
             $ingreso['costo_fraccion_extra'],
-            $ingreso['tolerancia_extra_minutos']
+            $ingreso['tolerancia_extra_minutos'],
+            (float)($ingreso['extra_noche'] ?? 0)
         );
 
         echo json_encode([
@@ -155,7 +167,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'buscar_placa') {
                 'calculo' => [
                     'fecha_salida' => $fecha_salida,
                     'minutos_totales' => (int)$calc['minutos_totales'],
-                    'monto_total' => (float)$calc['monto_total']
+                    'minutos_estancia' => (int)($calc['minutos_estancia'] ?? $calc['minutos_totales']),
+                    'minutos_cobrables' => (int)($calc['minutos_cobrables'] ?? $calc['minutos_totales']),
+                    'monto_tiempo' => (float)($calc['monto_tiempo'] ?? $calc['monto_total']),
+                    'extra_noche' => (float)($calc['extra_noche'] ?? 0),
+                        'extra_noche_veces' => (int)($calc['extra_noche_veces'] ?? 0),
+                    'monto_total' => (float)$calc['monto_total'],
+                    'hora_apertura' => $calc['hora_apertura'] ?? null,
+                    'hora_cierre' => $calc['hora_cierre'] ?? null,
+                    'sale_despues_cierre' => (int)($calc['sale_despues_cierre'] ?? 0),
+                    'cobro_hasta' => $calc['cobro_hasta'] ?? null
                 ]
             ]
         ]);
@@ -211,11 +232,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'registrar_salida') {
             $fecha_salida,
             $ingreso['costo_hora'],
             $ingreso['costo_fraccion_extra'],
-            $ingreso['tolerancia_extra_minutos']
+            $ingreso['tolerancia_extra_minutos'],
+            (float)($ingreso['extra_noche'] ?? 0)
         );
 
         $minutos_totales = (int)$calc['minutos_totales'];
         $monto_total_base = (float)$calc['monto_total'];
+        $extra_noche = (float)($calc['extra_noche'] ?? 0.00);
 
         $extra_boleto_perdido = 0.00;
         if ($boleto_perdido) {
@@ -257,6 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'registrar_salida') {
             $fecha_salida,
             $minutos_totales,
             $monto_total,
+            $extra_noche,
             $monto_recibido,
             $monto_cambio,
             $usuario_cobro,
@@ -278,7 +302,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'registrar_salida') {
                     'fecha_ingreso' => $ingreso['fecha_ingreso'],
                     'fecha_salida' => $fecha_salida,
                     'minutos_totales' => $minutos_totales,
+                    'minutos_estancia' => (int)($calc['minutos_estancia'] ?? $minutos_totales),
+                    'minutos_cobrables' => (int)($calc['minutos_cobrables'] ?? $minutos_totales),
                     'monto_total_base' => round2($monto_total_base),
+                    'extra_noche' => round2($extra_noche),
                     'extra_boleto_perdido' => round2($extra_boleto_perdido),
                     'subtotal' => round2($subtotal),
                     'descuento_tipo' => $descuento_tipo,
