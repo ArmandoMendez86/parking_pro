@@ -6,18 +6,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configuración Pro | Estacionamiento</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         :root {
             --bs-primary: #4f46e5;
             --bs-body-bg: #f8fafc;
         }
 
+
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bs-body-bg);
-            padding-bottom: 120px;
+           
+            width: 100%;
+            height: 100vh;
         }
 
         .card-pro {
@@ -40,8 +48,13 @@
             box-shadow: 0 8px 15px rgba(79, 70, 229, 0.2);
         }
 
+        /* TICKET MOCKUP - REGLAS ESPECIFICAS
+           Importante: Forzamos color negro aquí porque simula papel,
+           incluso si el tema global es oscuro.
+        */
         #ticket_mockup {
-            background: white;
+            background: white !important;
+            /* Siempre blanco (papel) */
             width: 280px;
             margin: 0 auto;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -49,6 +62,19 @@
             border: 1px solid #ddd;
             min-height: 480px;
             transition: width 0.3s ease;
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            padding-top: 16px !important;
+            color: #000 !important;
+            /* TEXTO NEGRO FORZADO PARA EL TICKET */
+        }
+
+        #ticket_mockup .val-block,
+        #ticket_mockup h1,
+        #ticket_mockup div {
+            color: #000 !important;
+            /* Asegurar que todo dentro sea negro */
         }
 
         .papel-58 {
@@ -64,18 +90,18 @@
             cursor: grab;
             position: relative;
             border: 1px dashed transparent;
+            border-radius: 12px;
+            margin: 4px 0;
+            transition: all .12s ease;
         }
 
         .sortable-item:hover {
             border-color: var(--bs-primary);
-            background: #f5f3ff;
+            background: rgba(79, 70, 229, .1) !important;
+            /* Hover visible en dark mode */
         }
 
-        .sortable-item.dragging {
-            opacity: 0.5;
-            background: #eef2ff;
-        }
-
+        /* Controles flotantes */
         .controles-bloque {
             position: absolute;
             top: -15px;
@@ -101,52 +127,7 @@
             padding: 0;
         }
 
-        .ticket-dashed {
-            border-top: 1px dashed #000;
-            margin: 5px 0;
-            width: 100%;
-        }
-
-        #barra_guardado {
-            position: fixed;
-            bottom: -120px;
-            left: 0;
-            right: 0;
-            background: #1e293b;
-            padding: 20px;
-            transition: 0.4s;
-            z-index: 1050;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        #barra_guardado.visible {
-            bottom: 0;
-        }
-
-        /* =========================
-   TICKET LIVE PREVIEW (PRO)
-   Solo visual: no afecta lógica
-   ========================= */
-
-        #ticket_mockup {
-            position: relative;
-            border: 1px solid rgba(15, 23, 42, .12);
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow:
-                0 18px 45px rgba(15, 23, 42, .12),
-                0 2px 8px rgba(15, 23, 42, .06);
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, 1)),
-                repeating-linear-gradient(0deg,
-                    rgba(2, 6, 23, .02),
-                    rgba(2, 6, 23, .02) 1px,
-                    transparent 1px,
-                    transparent 6px);
-            padding-top: 16px !important;
-        }
-
-        /* Perforado superior e inferior tipo recibo */
+        /* Decoración ticket */
         #ticket_mockup::before,
         #ticket_mockup::after {
             content: "";
@@ -154,8 +135,7 @@
             left: 0;
             right: 0;
             height: 14px;
-            background:
-                radial-gradient(circle at 10px 50%, transparent 8px, rgba(15, 23, 42, .10) 9px, transparent 10px) repeat-x;
+            background: radial-gradient(circle at 10px 50%, transparent 8px, rgba(15, 23, 42, .10) 9px, transparent 10px) repeat-x;
             background-size: 20px 14px;
             pointer-events: none;
             opacity: .9;
@@ -170,216 +150,144 @@
             transform: rotate(180deg);
         }
 
-        /* Simula margen de papel */
-        #ticket_mockup .val-block,
-        #ticket_mockup .ticket-dashed {
-            filter: saturate(1.02);
-        }
-
-        /* Bloques ordenables: más "card" y mejor hover */
-        .sortable-item {
-            border-radius: 12px;
-            padding: 10px 12px;
-            transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
-            border: 1px solid transparent;
-            margin: 4px 0;
-        }
-
-        .sortable-item:hover {
-            background: rgba(99, 102, 241, .08);
-            border-color: rgba(79, 70, 229, .35);
-            box-shadow: 0 8px 20px rgba(15, 23, 42, .08);
-            transform: translateY(-1px);
-        }
-
-        .sortable-item.dragging {
-            background: rgba(99, 102, 241, .12);
-            border-color: rgba(79, 70, 229, .45);
-            box-shadow: 0 14px 30px rgba(15, 23, 42, .14);
-            transform: scale(1.01);
-            opacity: .95;
-        }
-
-        /* Texto del ticket (más "impreso") */
-        .val-block {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            font-size: 12px;
-            line-height: 1.25;
-            color: rgba(2, 6, 23, .92);
-            letter-spacing: .2px;
-            text-rendering: geometricPrecision;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Cuando el texto es "header", que se note más */
-        #p_nombre_val {
-            font-size: 15px !important;
-            letter-spacing: .8px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        #p_telefono_val,
-        #p_direccion_val {
-            opacity: .92;
-        }
-
-        /* Separador tipo ticket: más realista */
         .ticket-dashed {
             border: 0 !important;
             height: 10px;
             margin: 10px 0;
-            background:
-                repeating-linear-gradient(90deg,
-                    rgba(2, 6, 23, .55) 0px,
-                    rgba(2, 6, 23, .55) 8px,
-                    transparent 8px,
-                    transparent 14px);
+            background: repeating-linear-gradient(90deg, rgba(2, 6, 23, .55) 0px, rgba(2, 6, 23, .55) 8px, transparent 8px, transparent 14px);
             opacity: .55;
-            border-radius: 2px;
         }
 
-        /* Bloque "cuerpo" (PLACA/MARCA/FOLIO...) que se vea como sección */
-        .sortable-item[data-id="p_cuerpo"] {
-            background: rgba(2, 6, 23, .03);
-            border: 1px solid rgba(2, 6, 23, .08);
-            border-radius: 14px;
-            padding: 12px;
-        }
-
-        .sortable-item[data-id="p_cuerpo"] .val-block {
-            font-size: 11px;
-            line-height: 1.35;
-        }
-
-        /* Controles flotantes más limpios */
-        .controles-bloque {
-            background: rgba(79, 70, 229, .92);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 10px 25px rgba(15, 23, 42, .18);
-            border: 1px solid rgba(255, 255, 255, .22);
-        }
-
-        .btn-edit {
-            opacity: .95;
-            transition: opacity .12s ease, transform .12s ease;
-        }
-
-        .btn-edit:hover {
-            opacity: 1;
-            transform: translateY(-1px);
-        }
-
-        /* Ajustes por ancho de papel para que siga viéndose "centrado" */
-        .papel-58 {
-            border-radius: 16px;
-        }
-
-        .papel-80 {
-            border-radius: 18px;
-        }
-
-        /* ===============================
-   FORMULARIO MÁS LIMPIO Y ESPACIADO
-   Solo visual (no lógica)
-   =============================== */
-
-        /* Espaciado general entre filas */
-        .row.g-3>div {
-            margin-bottom: 14px;
-        }
-
-        /* Labels más claros */
-        label.form-label {
+        /* TEXTO DEL TICKET */
+        .val-block {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.25;
             font-weight: 600;
-            font-size: 13px;
-            color: rgba(15, 23, 42, 0.85);
-            margin-bottom: 6px;
-            display: block;
+            /* Un poco más grueso para legibilidad */
         }
 
-        /* Inputs más grandes y cómodos */
+        /* FORMULARIOS Y UI */
         .form-control,
         .form-select {
             border-radius: 12px !important;
             padding: 10px 12px !important;
-            font-size: 14px;
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            box-shadow: none;
-            transition: all 0.15s ease;
         }
 
-        /* Mejor foco */
+        #barra_guardado {
+            position: fixed;
+            bottom: -120px;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            transition: 0.4s;
+            z-index: 1050;
+        }
+
+        #barra_guardado.visible {
+            bottom: 0;
+        }
+
+        /* ==========================================================
+           THEME OVERRIDE (SOFT GLASS / DARK MODE)
+           ========================================================== */
+        :root {
+            --radius: 20px;
+            --bg1: #101a30;
+            --bg2: #131f3a;
+            --glassA: rgba(255, 255, 255, .09);
+            --glassB: rgba(255, 255, 255, .04);
+            --border: rgba(255, 255, 255, .12);
+            --textMuted: rgba(255, 255, 255, .72);
+        }
+
+        body {
+            font-family: Inter, sans-serif !important;
+            background:
+                radial-gradient(1200px 700px at 10% 10%, rgba(59, 130, 246, .10), transparent 60%),
+                radial-gradient(900px 600px at 90% 15%, rgba(34, 197, 94, .07), transparent 65%),
+                linear-gradient(160deg, var(--bg1), var(--bg2)) !important;
+            color: #fff !important;
+            /* Texto global blanco */
+            background-attachment: fixed;
+        }
+
+        /* Corrección para Cards: Glass effect */
+        .card-pro {
+            background: linear-gradient(180deg, var(--glassA), var(--glassB)) !important;
+            border: 1px solid var(--border) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .22) !important;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .text-dark,
+        label {
+            color: #fff !important;
+        }
+
+        .text-muted {
+            color: var(--textMuted) !important;
+        }
+
+        /* Nav Pills */
+        .nav-pills .nav-link {
+            color: rgba(255, 255, 255, .82) !important;
+            background: rgba(255, 255, 255, .06) !important;
+            border: 1px solid rgba(255, 255, 255, .12) !important;
+        }
+
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+            border: 0 !important;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4) !important;
+        }
+
+        /* Inputs oscuros */
+        .form-control,
+        .form-select,
+        .form-control:disabled,
+        .form-control[readonly] {
+            background: rgba(0, 0, 0, .2) !important;
+            border: 1px solid rgba(255, 255, 255, .15) !important;
+            color: #fff !important;
+        }
+
         .form-control:focus,
         .form-select:focus {
-            border-color: rgba(79, 70, 229, 0.55);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+            border-color: rgba(255, 255, 255, .4) !important;
+            box-shadow: 0 0 0 .25rem rgba(59, 130, 246, .2) !important;
         }
 
-        /* Textareas más visibles */
-        textarea.form-control {
-            min-height: 90px;
-            resize: vertical;
-            line-height: 1.4;
-            font-size: 14px;
-            padding: 12px 14px !important;
+        /* Tablas Oscuras */
+        .table {
+            --bs-table-color: #fff;
+            --bs-table-bg: transparent;
+            --bs-table-border-color: rgba(255, 255, 255, 0.1);
         }
 
-        /* Si ya tienen texto, que se vea elegante */
-        textarea.form-control:not(:placeholder-shown) {
-            background: rgba(99, 102, 241, 0.03);
-        }
-
-        /* Separar secciones del formulario */
-        .card-body {
-            padding: 22px !important;
-        }
-
-        /* Bloques dentro del card */
-        .card-body hr {
-            margin: 20px 0;
-            opacity: 0.15;
-        }
-
-        /* Inputs pequeños como tolerancia o copias */
-        input[type="number"].form-control-sm {
-            padding: 8px 10px !important;
-            font-size: 13px;
-        }
-
-        /* Mejor tabla de tarifas */
-        #tabla_tarifas input {
-            border-radius: 10px !important;
-            padding: 7px 10px !important;
-            font-size: 13px;
-        }
-
-        /* Botón añadir tarifa más visible */
-        #btn_add_tarifa {
-            border-radius: 12px;
-            padding: 8px 14px;
+        .table thead th {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
             font-weight: 600;
-            box-shadow: 0 6px 18px rgba(15, 23, 42, .10);
         }
 
-        /* Textareas de encabezado/pie como "ticket editor" */
-        #encabezado_global,
-        #pie_entrada,
-        #pie_salida {
-            font-family: ui-monospace, monospace;
-            font-size: 13px;
-            background: rgba(2, 6, 23, 0.02);
+        .table td,
+        .table th {
+            background: transparent !important;
+            color: #fff !important;
+            border-bottom-color: rgba(255, 255, 255, 0.1);
         }
 
-        /* Que no se vea todo pegado */
-        .form-check {
-            margin-top: 6px;
-        }
-
-        /* Ajuste para switches */
-        .form-switch .form-check-input {
-            transform: scale(1.1);
-            cursor: pointer;
+        #barra_guardado {
+            background: rgba(10, 18, 32, .85) !important;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, .14) !important;
         }
     </style>
 </head>
@@ -390,8 +298,10 @@
     </script>
     <div class="toast-container position-fixed top-0 end-0 p-3">
         <div id="notificacion_toast" class="toast align-items-center text-white bg-dark border-0" role="alert">
-            <div class="d-flex">
-                <div class="toast-body" id="mensaje_toast"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            <div class="d-flex p-3">
+                <div class="toast-body d-flex align-items-center gap-2" id="mensaje_toast"></div>
+                 <i id="icono_toast" class="bi bi-check-circle-fill text-success fs-4"></i>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>
@@ -399,10 +309,10 @@
     <form id="form_configuracion">
         <input type="hidden" name="estilos_ticket" id="estilos_ticket_input">
 
-        <div class="container-fluid py-4 px-4">
+        <div class="container-fluid py-4 px-4 mt-4">
             <div class="row g-4 text-start">
                 <div class="col-lg-3 text-start">
-                    <div class="nav nav-pills flex-column bg-white p-3 card-pro sticky-top" style="top:20px;" id="v-pills-tab" role="tablist">
+                    <div class="nav nav-pills flex-column p-3 card-pro sticky-top" style="top:20px;" id="v-pills-tab" role="tablist">
                         <button class="nav-link active" id="tab-diseno" data-bs-toggle="pill" data-bs-target="#sec-hardware" type="button" role="tab"><i class="bi bi-printer me-2"></i>Diseño Ticket</button>
                         <button class="nav-link" id="tab-tarifas" data-bs-toggle="pill" data-bs-target="#sec-tarifas" type="button" role="tab"><i class="bi bi-cash-stack me-2"></i>Tarifas</button>
                         <button class="nav-link" id="tab-horarios" data-bs-toggle="pill" data-bs-target="#sec-horarios" type="button" role="tab"><i class="bi bi-clock me-2"></i>Horarios</button>
@@ -414,7 +324,7 @@
                         <div class="tab-pane fade show active" id="sec-hardware" role="tabpanel">
                             <div class="row g-4 text-start">
                                 <div class="col-md-7 text-start">
-                                    <div class="card card-pro p-4 bg-white mb-3 text-start">
+                                    <div class="card card-pro p-4 mb-3 text-start">
                                         <h6 class="fw-bold text-primary mb-3 text-uppercase">Datos y Visibilidad</h6>
                                         <div class="row g-3 mb-3 text-start">
                                             <div class="col-md-8 text-start"><label class="small fw-bold">Nombre</label>
@@ -431,13 +341,13 @@
                                             <div class="form-check form-switch d-inline-block float-end"><input class="form-check-input" type="checkbox" name="ver_encabezado" id="ver_encabezado"></div><textarea name="encabezado_global" id="encabezado_global" class="form-control" rows="2"></textarea>
                                         </div>
                                         <div class="mb-3 text-start"><label class="small fw-bold text-success">Pie Ticket Entrada</label>
-                                            <div class="form-check form-switch d-inline-block float-end"><input class="form-check-input" type="checkbox" name="ver_pie_e" id="ver_pie_e"></div><textarea name="pie_entrada" id="pie_entrada" class="form-control" rows="2"></textarea>
+                                            <div class="form-check form-switch d-inline-block float-end"><input class="form-check-input" type="checkbox" name="ver_pie_e" id="ver_pie_e"></div><textarea name="pie_entrada" id="pie_entrada" class="form-control" rows="6"></textarea>
                                         </div>
                                         <div class="mb-3 text-start"><label class="small fw-bold text-danger">Pie Ticket Salida</label>
                                             <div class="form-check form-switch d-inline-block float-end"><input class="form-check-input" type="checkbox" name="ver_pie_s" id="ver_pie_s"></div><textarea name="pie_salida" id="pie_salida" class="form-control" rows="2"></textarea>
                                         </div>
                                     </div>
-                                    <div class="card card-pro p-4 bg-white text-start">
+                                    <div class="card card-pro p-4 text-start">
                                         <h6 class="fw-bold text-primary mb-3 text-uppercase text-start">IMPRESORA</h6>
                                         <div class="row g-2 text-start">
                                             <div class="col-7 text-start"><label class="small fw-bold">Nombre</label><input type="text" name="nombre_impresora" id="nombre_impresora" class="form-control"></div>
@@ -486,7 +396,7 @@
                         </div>
 
                         <div class="tab-pane fade" id="sec-tarifas" role="tabpanel">
-                            <div class="card card-pro p-4 bg-white text-start">
+                            <div class="card card-pro p-4 text-start">
                                 <h5 class="fw-bold text-primary mb-3 text-start">Tarifas</h5>
                                 <div class="row g-3 mb-4 text-start">
                                     <div class="col-6"><label class="small fw-bold text-start">Moneda</label><input type="text" id="moneda" name="moneda" class="form-control"></div>
@@ -498,7 +408,7 @@
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table align-middle">
-                                        <thead class="table-light">
+                                        <thead>
                                             <tr class="small text-uppercase">
                                                 <th>Tipo</th>
                                                 <th>Costo Hora</th>
@@ -515,7 +425,7 @@
                         </div>
 
                         <div class="tab-pane fade" id="sec-horarios" role="tabpanel">
-                            <div class="card card-pro p-4 bg-white text-start text-start text-start">
+                            <div class="card card-pro p-4 text-start text-start text-start">
                                 <h5 class="fw-bold text-primary mb-4 text-start">Horarios</h5>
                                 <table class="table">
                                     <tbody id="lista_horarios"></tbody>

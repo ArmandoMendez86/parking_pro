@@ -104,6 +104,8 @@ CREATE TABLE `salidas_vehiculos` (
   `extra_noche` decimal(10,2) NOT NULL DEFAULT 0.00,
   `monto_recibido` decimal(10,2) NOT NULL DEFAULT 0.00,
   `monto_cambio` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `metodo_pago` enum('Efectivo','Tarjeta','Transferencia','Otro') NOT NULL DEFAULT 'Efectivo',
+  `referencia_pago` varchar(120) DEFAULT NULL,
   `usuario_cobro` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -158,7 +160,8 @@ ALTER TABLE `pensiones`
 ALTER TABLE `salidas_vehiculos`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_salida_por_ingreso` (`id_ingreso`),
-  ADD KEY `idx_fecha_salida` (`fecha_salida`);
+  ADD KEY `idx_fecha_salida` (`fecha_salida`),
+  ADD KEY `idx_fecha_metodo_usuario` (`fecha_salida`,`metodo_pago`,`usuario_cobro`);
 
 ALTER TABLE `tarifas_vehiculos`
   ADD PRIMARY KEY (`id`);
