@@ -102,12 +102,12 @@ function redirigirPorRol(rol) {
   const r = String(rol || "").toUpperCase().trim();
 
   if (r === "ADMIN") {
-    window.location.href = `${base}/vistas/reportes.php`;
+    window.location.href = `${base}vistas/dashboard.php`;
     return;
   }
 
   // CAJERO / OPERADOR / cualquier otro
-  window.location.href = `${base}/vistas/entrada.php`;
+  window.location.href = `${base}vistas/entrada.php`;
 }
 
 async function loginReal() {

@@ -17,343 +17,623 @@
 
     <style>
         :root {
-            --bs-primary: #4f46e5;
-            --bs-body-bg: #f8fafc;
+            --bg-0: #050816;
+            --bg-1: #07102a;
+            --glass: rgba(255, 255, 255, .06);
+            --glass-2: rgba(255, 255, 255, .08);
+            --border: rgba(255, 255, 255, .14);
+            --border-2: rgba(255, 255, 255, .22);
+            --text: #e5e7eb;
+            --muted: #a8b1c2;
+            --muted-2: #93a4bd;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+            --shadow-soft: 0 6px 18px rgba(0, 0, 0, .25);
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--bs-body-bg);
-            padding-bottom: 120px;
+            background:
+                radial-gradient(1200px 600px at 18% 20%, rgba(59, 130, 246, .18), transparent 60%),
+                radial-gradient(900px 500px at 80% 18%, rgba(14, 165, 233, .12), transparent 60%),
+                radial-gradient(900px 600px at 70% 78%, rgba(99, 102, 241, .12), transparent 60%),
+                linear-gradient(180deg, var(--bg-1), var(--bg-0));
+            color: var(--text);
+            padding-bottom: 160px;
+            height: 100%;
         }
 
-        .card-pro {
-            border: none;
+        a {
+            color: inherit;
+        }
+
+        /* Títulos */
+        .titulo-seccion {
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            text-shadow: 0 1px 0 rgba(0, 0, 0, .35);
+        }
+
+        .subtexto {
+            color: var(--muted);
+        }
+
+        /* Cards glass */
+        .card-pro,
+        .user-card {
+            border: 1px solid var(--border);
             border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--shadow);
         }
 
-        .nav-pills .nav-link {
-            color: #64748b;
-            font-weight: 600;
-            text-align: left;
-            border-radius: 12px !important;
-            margin-bottom: 6px;
+        .user-card {
+            overflow: hidden;
         }
 
-        .nav-pills .nav-link.active {
-            background-color: var(--bs-primary) !important;
-            color: white !important;
-            box-shadow: 0 8px 15px rgba(79, 70, 229, 0.2);
-        }
-
-        #barra_guardado {
-            position: fixed;
-            bottom: -140px;
-            left: 0;
-            right: 0;
-            background: #1e293b;
-            padding: 18px 18px 22px;
-            transition: 0.35s;
-            z-index: 1050;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        #barra_guardado.visible {
-            bottom: 0;
-        }
-
-        /* Tablet-first */
-        .form-control,
-        .form-select {
-            border-radius: 16px;
-        }
-
-        .form-control-lg,
-        .form-select-lg {
-            border-radius: 16px;
-            padding: 12px 14px;
-            font-size: 1rem;
-        }
-
-        .btn-lg {
-            border-radius: 16px;
-            padding: 12px 16px;
-            font-weight: 700;
-        }
-
-        .btn-soft {
-            background: rgba(79, 70, 229, .10);
-            color: var(--bs-primary);
-            border: 1px solid rgba(79, 70, 229, .18);
-        }
-
-        .btn-soft:hover {
-            background: rgba(79, 70, 229, .14);
-            border-color: rgba(79, 70, 229, .25);
-        }
-
-        .seccion-titulo {
-            font-weight: 800;
-            letter-spacing: .2px;
-        }
-
-        .seccion-titulo i {
-            color: var(--bs-primary);
-        }
-
-        /* Campos no amontonados */
-        .grupo-campo {
-            margin-bottom: 14px;
-        }
-
-        label.form-label {
-            font-weight: 700;
-            font-size: 0.92rem;
-            color: rgba(15, 23, 42, .85);
-            margin-bottom: 8px;
+        .user-card .top {
+            padding: 16px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
             display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .user-card .name {
+            font-weight: 900;
+            font-size: 1.08rem;
+            color: var(--text);
+            line-height: 1.15;
+        }
+
+        .user-card .meta {
+            color: var(--muted);
+            font-weight: 700;
+            font-size: .92rem;
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
             align-items: center;
-            gap: 8px;
         }
 
-        label.form-label i {
-            color: var(--bs-primary);
-            opacity: .95;
+        .user-card .actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
         }
 
-        textarea.form-control {
-            min-height: 110px;
-            resize: vertical;
-            line-height: 1.35;
+        /* Chips */
+        .chip {
+            border-radius: 999px;
+            padding: .45rem .75rem;
+            font-weight: 800;
+            font-size: .85rem;
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: rgba(0, 0, 0, .22);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            white-space: nowrap;
+        }
+
+        .chip-muted {
+            color: var(--muted);
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .chip-ok {
+            border-color: rgba(34, 197, 94, .35);
+            background: rgba(34, 197, 94, .14);
+            color: #bbf7d0;
+        }
+
+        .chip-off {
+            border-color: rgba(239, 68, 68, .35);
+            background: rgba(239, 68, 68, .14);
+            color: #fecaca;
+        }
+
+        /* Controles: visibilidad máxima en dark */
+        /* Labels: asegurar contraste en dark (no afecta funcionalidad) */
+        label,
+        .form-label,
+        .col-form-label {
+            color: rgba(234, 240, 255, .92) !important;
+            font-weight: 800;
+            letter-spacing: .1px;
+        }
+
+        .form-text,
+        .form-text *,
+        small,
+        .small {
+            color: rgba(168, 177, 194, .85) !important;
+        }
+
+
+        .form-control,
+        .form-select,
+        .input-group-text {
+            background: rgba(255, 255, 255, .06) !important;
+            border-color: rgba(255, 255, 255, .16) !important;
+            color: var(--text) !important;
+        }
+
+        .form-control::placeholder {
+            color: rgba(168, 177, 194, .75) !important;
         }
 
         .form-control:focus,
         .form-select:focus {
-            border-color: rgba(79, 70, 229, .55);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, .15);
+            box-shadow: 0 0 0 .25rem rgba(59, 130, 246, .25) !important;
+            border-color: rgba(59, 130, 246, .55) !important;
         }
 
-        /* Tabla & badges */
-        .tabla-pro thead th {
-            font-size: .82rem;
-            color: rgba(15, 23, 42, .65);
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: .4px;
-        }
-
-        .tabla-pro tbody td {
-            vertical-align: middle;
-        }
-
-        .badge-soft {
-            background: rgba(79, 70, 229, .10);
-            color: var(--bs-primary);
-            border: 1px solid rgba(79, 70, 229, .20);
-        }
-
-        /* Lista lateral */
-        .lista-mini {
-            max-height: calc(100vh - 260px);
-            overflow: auto;
-        }
-
-        .item-mini {
-            border: 1px solid rgba(15, 23, 42, .08);
-            border-radius: 16px;
-            padding: 12px 12px;
-            background: white;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            transition: .12s ease;
-            cursor: pointer;
-        }
-
-        .item-mini:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 22px rgba(15, 23, 42, .08);
-            border-color: rgba(79, 70, 229, .25);
-        }
-
-        .avatar-mini {
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            display: grid;
-            place-items: center;
-            background: rgba(79, 70, 229, .12);
-            color: var(--bs-primary);
-            font-weight: 900;
-        }
-
-        .item-mini .sub {
-            font-size: .86rem;
-            color: rgba(15, 23, 42, .62);
-        }
-
-        .item-mini.activo {
-            border-color: rgba(79, 70, 229, .45);
-            background: rgba(79, 70, 229, .06);
-        }
-
-        /* Switch cómodo */
-        .form-switch .form-check-input {
-            transform: scale(1.25);
-            cursor: pointer;
-        }
-
-        /* Toast */
-        .toast {
-            border-radius: 18px;
-        }
-
-        /* ====== PLAN (LIBRE) + DATALIST PRO (solo visual) ====== */
-        input[list].form-control-lg {
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, .98)),
-                radial-gradient(circle at 14px 14px, rgba(79, 70, 229, .10), transparent 40%);
-            border: 1px solid rgba(79, 70, 229, .18);
-            padding-right: 44px !important;
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 18px 18px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 16 16'%3E%3Cpath fill='%234f46e5' d='M2 3.5A1.5 1.5 0 0 1 3.5 2h9A1.5 1.5 0 0 1 14 3.5v6A1.5 1.5 0 0 1 12.5 11H9.707l-1.854 1.854A.5.5 0 0 1 7 12.5V11H3.5A1.5 1.5 0 0 1 2 9.5v-6z' opacity='.25'/%3E%3Cpath fill='%234f46e5' d='M4 5.25a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5A.75.75 0 0 1 4 5.25zm0 2.5a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5h-4.5A.75.75 0 0 1 4 7.75z'/%3E%3C/svg%3E");
-        }
-
-        input[list].form-control-lg:focus {
-            border-color: rgba(79, 70, 229, .55) !important;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, .16) !important;
-        }
-
-        input[list].form-control-lg::placeholder {
-            color: rgba(15, 23, 42, .45);
-            font-weight: 600;
-        }
-
-        label[for="plan_tipo"].form-label {
-            position: relative;
-        }
-
-        label[for="plan_tipo"].form-label::after {
-            content: "Sugerencias";
-            margin-left: 10px;
-            font-size: 12px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: rgba(79, 70, 229, .10);
-            border: 1px solid rgba(79, 70, 229, .18);
-            color: rgba(79, 70, 229, .95);
-        }
-
-        /* ===== Historial de pagos UI ===== */
-        .panel-suave {
-            border: 1px solid rgba(15, 23, 42, .08);
-            border-radius: 18px;
-            background: white;
-        }
-
-        .panel-suave .cabecera {
-            padding: 14px 14px;
-            border-bottom: 1px solid rgba(15, 23, 42, .06);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .panel-suave .cuerpo {
-            padding: 14px 14px;
-        }
-
-        .tabla-pagos td,
-        .tabla-pagos th {
-            white-space: nowrap;
-        }
-
-        .tabla-pagos tbody td {
-            font-size: .95rem;
-        }
-
-        .micro-ayuda {
-            font-size: .86rem;
-            color: rgba(15, 23, 42, .62);
-        }
-
-        /* Modal tablet-first */
-        .modal-content {
-            border-radius: 22px;
-            border: none;
-            box-shadow: 0 24px 60px rgba(15, 23, 42, .18);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid rgba(15, 23, 42, .06);
-        }
-
-        .modal-footer {
-            border-top: 1px solid rgba(15, 23, 42, .06);
+        .form-control-lg,
+        .form-select-lg {
+            border-radius: 12px;
+            padding: 1rem 1.1rem;
         }
 
         .input-group-text {
-            border-radius: 16px 0 0 16px;
+            border-radius: 12px;
+            padding: 1rem 1.1rem;
         }
 
-        /* ===== Tarjeta de estado de vigencia (sobre historial) ===== */
-        .tarjeta-vigencia {
-            border: 1px solid rgba(15, 23, 42, .08);
-            border-radius: 18px;
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, .96)),
-                radial-gradient(circle at 14px 14px, rgba(79, 70, 229, .10), transparent 42%);
-            box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
+        /* Select flecha visible */
+        .form-select {
+            background-image:
+                linear-gradient(45deg, transparent 50%, rgba(229, 231, 235, .9) 50%),
+                linear-gradient(135deg, rgba(229, 231, 235, .9) 50%, transparent 50%),
+                linear-gradient(to right, transparent, transparent) !important;
+            background-position:
+                calc(100% - 20px) calc(1em + 2px),
+                calc(100% - 15px) calc(1em + 2px),
+                100% 0 !important;
+            background-size: 5px 5px, 5px 5px, 2.5em 2.5em !important;
+            background-repeat: no-repeat !important;
         }
 
-        .tarjeta-vigencia .kpi {
-            font-weight: 900;
-            letter-spacing: .2px;
+        /* Opciones del select (evita texto claro sobre fondo claro) */
+        .form-select option {
+            background: rgba(13, 24, 43, 1) !important;
+            color: rgba(234, 240, 255, .96) !important;
+        }
+
+        .form-select option:disabled {
+            color: rgba(168, 177, 194, .75) !important;
+        }
+
+        .form-select {
+            color-scheme: dark;
+        }
+
+        /* Checkbox / Switch */
+        .form-check-label {
+            color: var(--text);
+        }
+
+        .form-check-input {
+            background-color: rgba(255, 255, 255, .08) !important;
+            border-color: rgba(255, 255, 255, .28) !important;
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 .25rem rgba(59, 130, 246, .25) !important;
+            border-color: rgba(59, 130, 246, .55) !important;
+        }
+
+        .form-check-input:checked {
+            background-color: rgba(59, 130, 246, .9) !important;
+            border-color: rgba(59, 130, 246, .95) !important;
+        }
+
+        .form-switch .form-check-input {
+            background-image: none;
+        }
+
+        .form-switch .form-check-input:not(:checked) {
+            background-color: rgba(148, 163, 184, .25) !important;
+        }
+
+        .form-switch .form-check-input:checked {
+            background-color: rgba(59, 130, 246, .9) !important;
+        }
+
+        .form-switch .form-check-input:disabled {
+            opacity: .55;
+            cursor: not-allowed !important;
+        }
+
+        /* Botones */
+        .btn-lg {
+            border-radius: 14px;
+            padding: .9rem 1.1rem;
+            font-weight: 800;
+        }
+
+        .btn-outline-secondary {
+            color: var(--text);
+            border-color: rgba(255, 255, 255, .22);
+        }
+
+        .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, .10);
+            border-color: rgba(255, 255, 255, .28);
+            color: var(--text);
+        }
+
+        .btn-outline-danger {
+            color: #fecaca;
+            border-color: rgba(239, 68, 68, .45);
+        }
+
+        .btn-outline-danger:hover {
+            background: rgba(239, 68, 68, .16);
+            color: #fee2e2;
+            border-color: rgba(239, 68, 68, .55);
+        }
+
+        .btn-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+        }
+
+        /* Hint */
+        .hint {
+            font-size: .9rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        /* Barra inferior */
+        .barra-accion {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 16, 40, .72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, .12);
+            padding: 1.1rem;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, .35);
+            z-index: 1000;
+            transform: translateY(110%);
+            transition: transform .25s ease;
+        }
+
+        .barra-accion.visible {
+            transform: translateY(0);
+        }
+
+        /* Layout */
+        @media (min-width: 992px) {
+            .layout-grid {
+                display: grid;
+                grid-template-columns: 1.25fr .75fr;
+                gap: 20px;
+                align-items: start;
+            }
+
+            .form-sticky {
+                position: sticky;
+                top: 16px;
+            }
+
+            .list-grid {
+                grid-template-columns: 1fr !important;
+                gap: 18px !important;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .list-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 18px;
+            }
+        }
+
+        /* Meta chips en grid para que no se apilen feo */
+        .user-card .meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        @media (max-width: 1200px) {
+            .user-card .meta {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .user-card .meta .chip {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        /* Iconos azules: que destaquen en dark */
+        .text-primary {
+            color: #60a5fa !important;
+        }
+
+        .text-success {
+            color: #34d399 !important;
+        }
+
+        .text-danger {
+            color: #fb7185 !important;
+        }
+
+        /* Pills / menú lateral */
+        .nav-pills .nav-link {
+            color: var(--muted);
+            font-weight: 700;
+            text-align: left;
+            border-radius: 14px !important;
+            margin-bottom: 8px;
+            padding: 12px 14px;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+
+        .nav-pills .nav-link:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, .06);
+            border-color: rgba(255, 255, 255, .12);
+        }
+
+        .nav-pills .nav-link.active {
+            background: rgba(59, 130, 246, .22) !important;
+            color: #eaf2ff !important;
+            border-color: rgba(59, 130, 246, .35) !important;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, .25);
+        }
+
+        /* Badges */
+        .badge-soft {
+            background: rgba(255, 255, 255, .08);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, .14);
+            padding: .45rem .7rem;
+            border-radius: 999px;
+            font-weight: 700;
         }
 
         .badge-estado {
+            background: rgba(255, 255, 255, .08);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, .14);
             border-radius: 999px;
-            padding: 8px 12px;
-            font-weight: 900;
-            letter-spacing: .2px;
-            border: 1px solid rgba(15, 23, 42, .10);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            padding: .25rem .6rem;
+            font-weight: 700;
         }
 
-        .badge-estado.ok {
-            background: rgba(34, 197, 94, .10);
-            color: rgba(21, 128, 61, 1);
-            border-color: rgba(34, 197, 94, .22);
+        /* Botones */
+        .btn-soft {
+            background: rgba(59, 130, 246, .14);
+            color: #dbeafe;
+            border: 1px solid rgba(59, 130, 246, .25);
         }
 
-        .badge-estado.warn {
-            background: rgba(245, 158, 11, .12);
-            color: rgba(180, 83, 9, 1);
-            border-color: rgba(245, 158, 11, .25);
+        .btn-soft:hover {
+            background: rgba(59, 130, 246, .18);
+            border-color: rgba(59, 130, 246, .32);
+            color: #eff6ff;
         }
 
-        .badge-estado.bad {
-            background: rgba(239, 68, 68, .10);
-            color: rgba(185, 28, 28, 1);
-            border-color: rgba(239, 68, 68, .22);
+        /* Tablas (fix: fondo oscuro real + texto visible) */
+        .table {
+            color: var(--text) !important;
+            --bs-table-color: var(--text);
+            --bs-table-bg: transparent;
+            --bs-table-border-color: rgba(255, 255, 255, .12);
+            --bs-table-striped-color: var(--text);
+            --bs-table-striped-bg: rgba(255, 255, 255, .04);
+            --bs-table-hover-color: var(--text);
+            --bs-table-hover-bg: rgba(255, 255, 255, .06);
         }
 
-        .detalle-vigencia {
-            font-size: .88rem;
-            color: rgba(15, 23, 42, .62);
+        /* Bootstrap 5 pinta celdas con background por variable: lo forzamos a transparente */
+        .table> :not(caption)>*>* {
+            background-color: transparent !important;
+            color: var(--text) !important;
+        }
+
+        .table thead th {
+            color: var(--muted) !important;
+            background: rgba(255, 255, 255, .06) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, .16) !important;
+        }
+
+        .table tbody td,
+        .table tbody th {
+            border-top: 1px solid rgba(255, 255, 255, .10) !important;
+        }
+
+        .table-hover tbody tr:hover {
+            background: rgba(255, 255, 255, .04) !important;
+        }
+
+        /* Si algún template trae table-light/bg-white */
+        .table-light,
+        .table.table-light {
+            --bs-table-bg: transparent !important;
+            --bs-table-color: var(--text) !important;
+        }
+
+        /* Ajustes de textos bootstrap */
+        .text-secondary {
+            color: var(--muted) !important;
+        }
+
+        .text-muted {
+            color: var(--muted) !important;
+        }
+
+        /* Dropdown nativo (select options) */
+        select option {
+            background: #0b1736;
+            color: #e5e7eb;
+        }
+
+
+        .bg-white,
+        .bg-light {
+            background: rgba(255, 255, 255, .06) !important;
+            border: 1px solid rgba(255, 255, 255, .14);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+
+
+        /* =========================
+           FIX VISIBILIDAD TOTAL (labels/textos/tablas)
+           No afecta funcionalidad (solo CSS)
+           ========================= */
+
+        /* Asegurar contraste de títulos y textos dentro de tarjetas */
+        .card-pro,
+        .card-pro .card-body {
+            color: var(--text) !important;
+        }
+
+        .card-pro h1,
+        .card-pro h2,
+        .card-pro h3,
+        .card-pro h4,
+        .card-pro h5,
+        .card-pro h6,
+        .card-pro .fw-bold,
+        .card-pro .fw-semibold,
+        .card-pro .section-title {
+            color: rgba(234, 240, 255, .96) !important;
+        }
+
+        .card-pro .subtexto,
+        .card-pro .text-secondary,
+        .card-pro .text-muted,
+        .card-pro .small,
+        .card-pro small,
+        .card-pro .form-text {
+            color: rgba(168, 177, 194, .92) !important;
+        }
+
+        /* Pills / Tabs del panel izquierdo */
+        .nav-pills .nav-link {
+            color: rgba(234, 240, 255, .92) !important;
+            background: rgba(255, 255, 255, .04) !important;
+            border: 1px solid rgba(255, 255, 255, .10) !important;
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+
+        .nav-pills .nav-link:hover {
+            background: rgba(255, 255, 255, .06) !important;
+            border-color: rgba(255, 255, 255, .16) !important;
+        }
+
+        .nav-pills .nav-link.active {
+            background: rgba(59, 130, 246, .22) !important;
+            border-color: rgba(59, 130, 246, .42) !important;
+            color: rgba(234, 240, 255, .98) !important;
+            box-shadow: 0 0 0 .25rem rgba(59, 130, 246, .12);
+        }
+
+        /* Inputs / selects / textarea: asegurar texto + placeholder + estados */
+        .form-control,
+        .form-select,
+        textarea.form-control {
+            color: rgba(234, 240, 255, .96) !important;
+        }
+
+        .form-control::placeholder,
+        textarea.form-control::placeholder {
+            color: rgba(168, 177, 194, .78) !important;
+            opacity: 1;
+        }
+
+        .form-control:disabled,
+        .form-select:disabled {
+            color: rgba(234, 240, 255, .65) !important;
+            background: rgba(255, 255, 255, .035) !important;
+            border-color: rgba(255, 255, 255, .12) !important;
+        }
+
+        /* Check / switch: visibilidad en dark */
+        .form-check-label {
+            color: rgba(234, 240, 255, .92) !important;
+        }
+
+        .form-check-input {
+            background-color: rgba(255, 255, 255, .10) !important;
+            border-color: rgba(255, 255, 255, .20) !important;
+        }
+
+        .form-check-input:checked {
+            background-color: rgba(59, 130, 246, .95) !important;
+            border-color: rgba(59, 130, 246, .95) !important;
+        }
+
+        .form-switch .form-check-input {
+            width: 3.2em;
+            height: 1.6em;
+        }
+
+        /* Tablas Bootstrap: evitar fondo blanco y asegurar contraste */
+        .table {
+            --bs-table-bg: transparent !important;
+            --bs-table-color: rgba(234, 240, 255, .94) !important;
+            --bs-table-border-color: rgba(255, 255, 255, .10) !important;
+            --bs-table-striped-bg: rgba(255, 255, 255, .03) !important;
+            --bs-table-striped-color: rgba(234, 240, 255, .94) !important;
+            --bs-table-active-bg: rgba(59, 130, 246, .10) !important;
+            --bs-table-active-color: rgba(234, 240, 255, .96) !important;
+            --bs-table-hover-bg: rgba(255, 255, 255, .04) !important;
+            --bs-table-hover-color: rgba(234, 240, 255, .96) !important;
+        }
+
+        .table> :not(caption)>*>* {
+            background-color: transparent !important;
+            color: rgba(234, 240, 255, .94) !important;
+            border-bottom-color: rgba(255, 255, 255, .10) !important;
+        }
+
+        .table thead th {
+            color: rgba(234, 240, 255, .78) !important;
+            font-weight: 800;
+            text-transform: none;
+        }
+
+        /* Dropdown nativo del select: mejorar opciones (limitado por navegador, pero ayuda) */
+        select.form-select option {
+            background: #0b1228;
+            color: rgba(234, 240, 255, .95);
+        }
+
+        .toast-pro {
+            border-radius: 18px !important;
+            background: rgba(10, 18, 34, .75) !important;
+            border: 1px solid rgba(255, 255, 255, .12) !important;
+            color: #fff !important;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, .35) !important;
+            backdrop-filter: blur(10px);
         }
     </style>
 </head>
 
 <body>
-
+    <?php include __DIR__ . "/../app/componentes/Navbar.php"; ?>
     <div class="container py-4">
 
         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -689,7 +969,7 @@
     </div>
 
     <!-- Barra flotante inferior -->
-    <div id="barra_guardado">
+    <div id="barra_guardado" class="barra-accion">
         <div class="container">
             <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-2">
                 <div class="text-white">
@@ -794,7 +1074,7 @@
     </div>
 
     <!-- Toast -->
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
+    <!-- <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100">
         <div id="notificacion_toast" class="toast shadow-sm" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
                 <i class="bi bi-check2-circle text-success me-2"></i>
@@ -804,6 +1084,18 @@
             </div>
             <div class="toast-body" id="mensaje_toast">Acción realizada.</div>
         </div>
+    </div> -->
+
+    <!-- Toast (IDs intactos para tu JS) -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="notificacion_toast" class="toast toast-pro" role="alert">
+            <div class="d-flex p-3">
+                <div class="toast-body d-flex align-items-center gap-2">
+                    <i id="icono_toast" class="bi bi-check-circle-fill text-success fs-4"></i>
+                    <span id="mensaje_toast" class="fw-semibold"></span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -811,7 +1103,7 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="<?php echo URL_BASE; ?>publico/js/modulos/pensiones_global.js"></script>
+    <script src="<?php echo URL_BASE; ?>publico/js/modulos/pensiones.js"></script>
 </body>
 
 </html>

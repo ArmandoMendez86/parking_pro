@@ -182,6 +182,7 @@
 </head>
 
 <body>
+     <?php include __DIR__ . "/../app/componentes/Navbar.php"; ?>
     <div class="container-fluid content-pad">
 
         <div class="d-flex align-items-center justify-content-between mb-5">

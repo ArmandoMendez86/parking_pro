@@ -153,4 +153,24 @@ class UsuariosModelo
 
         return ($stmt->rowCount() >= 0);
     }
+
+    public function contarAdminsActivos(): int
+    {
+        $sql = "SELECT COUNT(*) AS total
+            FROM usuarios
+            WHERE UPPER(rol) = 'ADMIN' AND activo = 1";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->execute();
+        $row = $stmt->fetch();
+        return (int)($row['total'] ?? 0);
+    }
+
+    public function obtenerRolYActivoPorId(int $id): ?array
+    {
+        $sql = "SELECT id, rol, activo FROM usuarios WHERE id = ? LIMIT 1";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
 }

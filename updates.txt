@@ -1,4 +1,12 @@
+ACTUALIZACIONES:
 1. Agregar dictado de voz
 2. Ver como el sistema puede guardar marcas de vehiculos
 3. Desplegar las impresoras termicas automaticamente
 4. Cuando se registre entrada verificar si el vehiculo cuenta con pension
+5. hacer una paleta de colores dinamica
+6. Mejorar la interfaz de usuario (Checkbox) activado/desactivado
+
+PENDIENTES:
+1. Reportes falta Mejorar
+2. Tarifas falta renderizar tabla completa
+3. Usuarios checar boton nuevo que funcionar va a cumplir

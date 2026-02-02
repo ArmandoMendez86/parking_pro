@@ -15,260 +15,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
+    <link rel="stylesheet" href="../publico/css/usuarios.css">
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f8fafc;
-            padding-bottom: 140px;
-        }
-
-        .card-pro {
-            border: 0;
-            border-radius: 20px;
-            background: #fff;
-            box-shadow: var(--card-shadow);
-        }
-
-        .titulo-seccion {
-            font-weight: 900;
-            letter-spacing: -0.5px;
-            color: #0f172a;
-        }
-
-        .subtexto {
-            color: #64748b;
-        }
-
-        .form-control-lg,
-        .form-select-lg {
-            border-radius: 12px;
-            padding: 1rem 1.1rem;
-            border-color: #e2e8f0;
-        }
-
-        .input-group-text {
-            border-radius: 12px;
-            padding: 1rem 1.1rem;
-            border-color: #e2e8f0;
-        }
-
-        .btn-lg {
-            border-radius: 14px;
-            padding: 0.9rem 1.1rem;
-            font-weight: 800;
-        }
-
-        .chip {
-            border-radius: 999px;
-            padding: .45rem .75rem;
-            font-weight: 800;
-            font-size: .85rem;
-            border: 1px solid #e2e8f0;
-            background: #fff;
-            color: #0f172a;
-            display: inline-flex;
-            align-items: center;
-            gap: .5rem;
-            white-space: nowrap;
-        }
-
-        .chip-muted {
-            color: #475569;
-            background: #f1f5f9;
-        }
-
-        .chip-ok {
-            border-color: rgba(34, 197, 94, .25);
-            background: rgba(34, 197, 94, .10);
-            color: #166534;
-        }
-
-        .chip-off {
-            border-color: rgba(239, 68, 68, .25);
-            background: rgba(239, 68, 68, .10);
-            color: #991b1b;
-        }
-
-        /* ===== LISTADO: más aire, menos amontonado ===== */
-        .list-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
-
-        /* En desktop normal (lg): 1 columna para respirar */
-        @media (min-width: 992px) {
-            .layout-grid {
-                display: grid;
-                grid-template-columns: 1.1fr .9fr;
-                gap: 18px;
-                align-items: start;
-            }
-
-            .form-sticky {
-                position: sticky;
-                top: 16px;
-            }
-
-            .list-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-        }
-
-        /* En pantallas grandes (xl): ya puedes usar 2 columnas */
-        @media (min-width: 1200px) {
-            .list-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 18px;
-            }
-        }
-
-        .user-card {
-            border-radius: 20px;
-            box-shadow: var(--card-shadow);
-            border: 0;
-            background: #fff;
-            overflow: hidden;
-        }
-
-        .user-card .top {
-            padding: 16px 18px;
-            border-bottom: 1px solid #eef2f7;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 14px;
-        }
-
-        .user-card .name {
-            font-weight: 900;
-            font-size: 1.08rem;
-            color: #0f172a;
-            line-height: 1.15;
-        }
-
-        .user-card .meta {
-            color: #64748b;
-            font-weight: 700;
-            font-size: .92rem;
-            margin-top: 8px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .user-card .actions {
-            display: flex;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .btn-icon {
-            width: 54px;
-            height: 54px;
-            border-radius: 14px;
-            display: grid;
-            place-items: center;
-            padding: 0;
-        }
-
-        .barra-accion {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #fff;
-            padding: 1.1rem;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, .06);
-            z-index: 1000;
-            transform: translateY(110%);
-            transition: transform .25s ease;
-        }
-
-        .barra-accion.visible {
-            transform: translateY(0);
-        }
-
-        .hint {
-            font-size: .9rem;
-            color: #64748b;
-            font-weight: 700;
-        }
-
-        /* Archivo: vistas/usuarios/index.php */
-        /* PEGA ESTO AL FINAL DEL <style> (bloque completo, copiar/pegar) */
-
-        /* ====== FIX LISTADO “AMONTONADO” ======
-   1) El listado debe ser 1 columna y ancho completo (no 2 cards por fila)
-   2) Dentro de cada card: título a la izquierda y acciones en columna a la derecha (no roban ancho)
-   3) Chips en 2 columnas para que no se apilen feo
-*/
-
-        @media (min-width: 992px) {
-
-            /* Forzar 1 columna en el listado (así cada card respira) */
-            .list-grid {
-                grid-template-columns: 1fr !important;
-                gap: 18px !important;
-            }
-
-            /* Listado un poco más ancho que el form */
-            .layout-grid {
-                grid-template-columns: 1.25fr .75fr !important;
-                gap: 20px !important;
-            }
-        }
-
-        /* Card: acciones en columna (switch arriba, editar abajo) */
-        .user-card .top {
-            align-items: flex-start !important;
-        }
-
-        .user-card .actions {
-            flex-direction: column !important;
-            gap: 10px !important;
-            align-items: flex-end !important;
-            width: 64px;
-            /* reserva espacio fijo para botones */
-            flex-shrink: 0 !important;
-        }
-
-        /* Evita que el texto quede “estrecho” por acciones */
-        .user-card .top>.flex-grow-1 {
-            min-width: 0;
-        }
-
-        /* Chips: grid para que se acomoden bonito */
-        .user-card .meta {
-            display: grid !important;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px !important;
-            margin-top: 10px !important;
-        }
-
-        /* En pantallas medianas: 1 columna de chips */
-        @media (max-width: 1200px) {
-            .user-card .meta {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Chips ocupan todo el ancho dentro del grid */
-        .user-card .meta .chip {
-            width: 100%;
-            justify-content: flex-start;
-        }
-    </style>
 </head>
 
 <body>
-
+    <?php include __DIR__ . "/../app/componentes/Navbar.php"; ?>
     <div class="container py-4" style="max-width: 1100px;">
         <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
             <div>
@@ -379,7 +131,7 @@
                         <input id="password" type="password" class="form-control form-control-lg" placeholder="••••••••" maxlength="60">
                     </div>
 
-                    <div class="card-pro p-3" style="background:#f1f5f9; box-shadow:none;">
+                    <div class="card-pro p-3">
                         <div class="d-flex align-items-center justify-content-between gap-3">
                             <div>
                                 <div class="fw-black" style="font-weight:900;">
@@ -437,7 +189,11 @@
 
     <script>
         window.URL_BASE = "<?php echo defined('URL_BASE') ? URL_BASE : 'http://localhost/sistema_estacionamiento/'; ?>";
+        window.CURRENT_USER_ID = <?php echo (int)($_SESSION['usuario_id'] ?? 0); ?>;
+        window.CURRENT_USER_ROLE = "<?php echo (string)($_SESSION['rol'] ?? ''); ?>";
     </script>
+
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

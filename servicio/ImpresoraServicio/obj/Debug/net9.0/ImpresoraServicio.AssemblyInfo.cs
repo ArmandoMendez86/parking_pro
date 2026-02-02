@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ImpresoraServicio")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+272c6e9bc4ff317abc402548e0a388b3479160d6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+19e2cbbcd1494f907811f866101880034165f764")]
 [assembly: System.Reflection.AssemblyProductAttribute("ImpresoraServicio")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ImpresoraServicio")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

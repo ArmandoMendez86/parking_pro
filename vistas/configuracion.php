@@ -293,6 +293,7 @@
 </head>
 
 <body class="text-start">
+     <?php include __DIR__ . "/../app/componentes/Navbar.php"; ?>
     <script>
         const URL_BASE = "<?php echo URL_BASE; ?>";
     </script>
@@ -440,7 +441,7 @@
         <div id="barra_guardado" class="text-center"><button type="submit" class="btn btn-primary px-5 rounded-pill fw-bold">GUARDAR CONFIGURACIÓN</button></div>
     </form>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../publico/js/modulos/configuracion_global.js"></script>
+    <script src="../publico/js/modulos/configuracion.js"></script>
 </body>
 
 </html>

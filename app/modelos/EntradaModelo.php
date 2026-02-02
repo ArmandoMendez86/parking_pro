@@ -1,4 +1,6 @@
 <?php
+// Archivo: app/modelos/EntradaModelo.php
+
 class EntradaModelo
 {
     private $conexion;
@@ -14,6 +16,22 @@ class EntradaModelo
         $stmt = $this->conexion->prepare($sql);
         $stmt->execute([$placa]);
         return $stmt->fetch();
+    }
+
+    public function obtenerTarifaPorId($id_tarifa)
+    {
+        $sql = "SELECT * FROM tarifas_vehiculos WHERE id = ? LIMIT 1";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->execute([(int)$id_tarifa]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerHorarioPorDiaSemana($dia_semana)
+    {
+        $sql = "SELECT * FROM horarios_operacion WHERE dia_semana = ? LIMIT 1";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->execute([$dia_semana]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function registrarIngreso(

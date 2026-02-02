@@ -305,7 +305,96 @@ require_once '../config/configuracion.php';
         flex-wrap: wrap;
       }
     }
-  </style>
+  
+    /* === Fix visibilidad (labels / inputs / checks) - no afecta funcionalidad === */
+    label,
+    .form-label,
+    .col-form-label,
+    .form-check-label,
+    .input-group-text,
+    .form-text,
+    small,
+    .text-muted {
+      color: rgba(255,255,255,.88) !important;
+    }
+
+    .form-text,
+    small,
+    .text-muted {
+      color: rgba(255,255,255,.65) !important;
+    }
+
+    .form-control,
+    .form-select,
+    .form-control-plaintext {
+      color: rgba(255,255,255,.92) !important;
+      border-color: rgba(255,255,255,.14) !important;
+    }
+
+    .form-control:disabled,
+    .form-select:disabled,
+    .form-control[readonly] {
+      color: rgba(255,255,255,.65) !important;
+      background: rgba(255,255,255,.04) !important;
+      border-color: rgba(255,255,255,.10) !important;
+      opacity: 1 !important;
+    }
+
+    .form-control::placeholder {
+      color: rgba(255,255,255,.55) !important;
+      opacity: 1 !important;
+    }
+
+    .form-select {
+      background-color: rgba(255,255,255,.06) !important;
+    }
+
+    /* Opciones del select (evita dropdown blanco) */
+    .form-select option,
+    select option {
+      background: #0f1b32 !important;
+      color: rgba(255,255,255,.92) !important;
+    }
+
+    /* Checkbox / radio */
+    .form-check-input {
+      background-color: rgba(255,255,255,.08) !important;
+      border-color: rgba(255,255,255,.22) !important;
+    }
+    .form-check-input:checked {
+      background-color: rgba(13,110,253,.95) !important;
+      border-color: rgba(13,110,253,.95) !important;
+    }
+    .form-check-input:focus {
+      box-shadow: 0 0 0 .2rem rgba(13,110,253,.25) !important;
+    }
+
+    /* Date/time inputs mejor en dark */
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"],
+    input[type="month"],
+    input[type="week"]{
+      color-scheme: dark;
+    }
+
+    /* Tablas: evita fondos claros por variables BS */
+    .table {
+      --bs-table-bg: transparent;
+      --bs-table-accent-bg: transparent;
+      --bs-table-striped-bg: rgba(255,255,255,.04);
+      --bs-table-active-bg: rgba(255,255,255,.06);
+      --bs-table-hover-bg: rgba(255,255,255,.06);
+      --bs-table-color: rgba(255,255,255,.88);
+      color: rgba(255,255,255,.88) !important;
+    }
+    .table > :not(caption) > * > *{
+      background-color: transparent !important;
+      color: rgba(255,255,255,.88) !important;
+      border-color: rgba(255,255,255,.10) !important;
+    }
+
+</style>
 
   <script>
     window.URL_BASE = "<?php echo defined('URL_BASE') ? URL_BASE : 'http://localhost/sistema_estacionamiento/'; ?>";
@@ -313,6 +402,7 @@ require_once '../config/configuracion.php';
 </head>
 
 <body>
+  <?php include __DIR__ . "/../app/componentes/Navbar.php"; ?>
   <div class="app-wrap">
     <div class="app-shell">
 
@@ -335,7 +425,6 @@ require_once '../config/configuracion.php';
             <span style="opacity:.75;">(<?php echo htmlspecialchars(AuthHelper::rol() ?? ''); ?>)</span>
           </span>
 
-          <?php include __DIR__ . "/../app/componentes/BotonLogout.php"; ?>
 
           <button id="btnNuevo" class="btn btn-primary btn-lg">
             <i class="bi bi-plus-lg me-2"></i>Nuevo

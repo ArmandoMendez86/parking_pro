@@ -3,7 +3,8 @@
 require_once '../../config/configuracion.php';
 require_once '../modelos/LoginModelo.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
+
 
 $modelo = new LoginModelo($db);
 $accion = $_GET['accion'] ?? '';
@@ -62,39 +63,68 @@ try {
 
     if ($accion === 'logout') {
 
-        ensure_session();
+        // ✅ Asegurar sesión activa
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
 
-        // ✅ Limpiar sesión
+        // ✅ Vaciar sesión
         $_SESSION = [];
 
         // ✅ Borrar cookie de sesión
         if (ini_get("session.use_cookies")) {
+
             $params = session_get_cookie_params();
+
             setcookie(
                 session_name(),
                 '',
-                time() - 42000,
-                $params["path"],
-                $params["domain"],
-                $params["secure"],
-                $params["httponly"]
+                [
+                    'expires'  => time() - 42000,
+                    'path'     => $params['path'],
+                    'domain'   => $params['domain'],
+                    'secure'   => $params['secure'],
+                    'httponly' => $params['httponly'],
+                    'samesite' => 'Lax',
+                ]
             );
         }
 
         // ✅ Destruir sesión
         session_destroy();
 
-        // ✅ Redirigir SIEMPRE al login
-        header("Location: " . (defined("URL_BASE") ? URL_BASE : "") . "vistas/login.php");
+        // ============================================
+        // ✅ Detectar si viene de fetch() o navegador
+        // ============================================
+
+        $esAjax = (
+            isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+        );
+
+        // Si viene desde JS → responder JSON
+        if ($esAjax) {
+            json_ok([], "Sesión cerrada correctamente");
+        }
+
+        // Si viene como página normal → redirigir al login
+        header("Location: " . URL_BASE . "vistas/login.php");
         exit;
     }
 
 
-    if ($accion === 'login') {
-        ensure_session();
 
+
+    if ($accion === 'login') {
+
+        // ✅ En endpoints JSON, evita que warnings/notices se impriman y rompan el JSON
+        // (en XAMPP es común tener display_errors=On)
+        ini_set('display_errors', '0');
+        ini_set('log_errors', '1');
+
+        // ✅ Leer JSON ANTES de iniciar sesión (aquí NO necesitas sesión)
         $data = post_json();
-        $usuario = str_clean($data['usuario'] ?? '');
+        $usuario  = str_clean($data['usuario'] ?? '');
         $password = (string)($data['password'] ?? '');
         $recordar = (bool)($data['recordar'] ?? false);
 
@@ -104,6 +134,39 @@ try {
         if (strlen($usuario) < 3) json_fail('Usuario inválido');
         if (strlen($password) < 4) json_fail('Contraseña inválida');
 
+        // ✅ Configurar "recordarme" ANTES de session_start()
+        // IMPORTANTE: session_set_cookie_params debe ir antes de iniciar sesión
+        if ($recordar) {
+            $vida = 60 * 60 * 24 * 7; // 7 días
+
+            // gc_maxlifetime (el warning te salía por hacerlo con sesión activa)
+            ini_set('session.gc_maxlifetime', (string)$vida);
+
+            // cookie de sesión con mayor duración
+            session_set_cookie_params([
+                'lifetime' => $vida,
+                'path'     => '/',
+                'httponly' => true,
+                'samesite' => 'Lax',
+                // 'secure' => true, // actívalo si estás en HTTPS
+            ]);
+        } else {
+            // cookie normal de sesión (hasta cerrar navegador)
+            session_set_cookie_params([
+                'lifetime' => 0,
+                'path'     => '/',
+                'httponly' => true,
+                'samesite' => 'Lax',
+                // 'secure' => true,
+            ]);
+        }
+
+        // ✅ Ahora sí inicia sesión
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        // ✅ Validar usuario
         $u = $modelo->obtenerUsuarioPorUsuario($usuario);
 
         if (!$u) {
@@ -118,31 +181,27 @@ try {
             json_fail('Credenciales incorrectas');
         }
 
-        // sesión
+        // ✅ Buenas prácticas: regenerar ID de sesión al autenticar (evita session fixation)
+        session_regenerate_id(true);
+
+        // ✅ Setear sesión
         $_SESSION['auth'] = true;
         $_SESSION['usuario'] = (string)$u['usuario'];
         $_SESSION['nombre'] = (string)$u['nombre'];
         $_SESSION['rol'] = (string)$u['rol'];
         $_SESSION['usuario_id'] = (int)$u['id'];
 
-        // Actualiza último acceso
+        // ✅ Actualiza último acceso
         $modelo->actualizarUltimoAcceso((int)$u['id']);
 
-        // “Recordarme”: sesión más larga (sin implementar token persistente en BD)
-        // Si quieres recordarme REAL (multi-dispositivo), agregamos tabla sesiones_tokens.
-        if ($recordar) {
-            // 7 días
-            ini_set('session.gc_maxlifetime', (string)(60 * 60 * 24 * 7));
-            $params = session_get_cookie_params();
-            setcookie(session_name(), session_id(), time() + (60 * 60 * 24 * 7), $params["path"], $params["domain"], $params["secure"], true);
-        }
-
+        // ✅ Responder JSON limpio
         json_ok([
             'usuario' => $_SESSION['usuario'],
-            'nombre' => $_SESSION['nombre'],
-            'rol' => $_SESSION['rol']
+            'nombre'  => $_SESSION['nombre'],
+            'rol'     => $_SESSION['rol']
         ], 'Acceso concedido');
     }
+
 
     json_fail('Acción no válida');
 } catch (Exception $e) {

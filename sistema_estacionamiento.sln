@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "servicio", "servicio", "{E331B72B-B1E2-C3F7-5EBB-F2A2607071AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImpresoraServicio", "servicio\ImpresoraServicio\ImpresoraServicio.csproj", "{F9AEEBF9-E023-B5C4-2591-AF0FF7F13BEF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9AEEBF9-E023-B5C4-2591-AF0FF7F13BEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9AEEBF9-E023-B5C4-2591-AF0FF7F13BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9AEEBF9-E023-B5C4-2591-AF0FF7F13BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9AEEBF9-E023-B5C4-2591-AF0FF7F13BEF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F9AEEBF9-E023-B5C4-2591-AF0FF7F13BEF} = {E331B72B-B1E2-C3F7-5EBB-F2A2607071AE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FCD51604-98B0-4644-8B31-63F071D2B6B0}
+	EndGlobalSection
+EndGlobal
